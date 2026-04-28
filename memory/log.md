@@ -4,10 +4,12 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 
 ---
 
-## 2026-04-28 — Initialize personal AI workspace
+## 2026-04-28 — Build full repo structure in English
 
-- Created `AGENTS.md` defining Claw's identity, workflow, memory system, and closing-action protocol
-- Created `MEMORY.md` for long-term persistent memory
-- Created `memory/log.md` (this file) for short-term task records
-- Outcome: repository is ready to operate as a long-term personal AI workspace via GitHub Copilot
-- Follow-ups: none
+- Rewrote README.md in English: mirrors liyupi/github-claw structure, excludes "AI-produced sub-projects" section, references Cesium PR digest instead of AI tech digest
+- Created LICENSE (MIT)
+- Created memory/tasks.md
+- Created .agents/skills/ with three skill packs: ui-ux-pro-max, ai-image-generation, seo-audit (each with SKILL.md)
+- Created .github/workflows/: cesium-daily-pr.yml, issue-handler.yml, deploy-pages.yml
+- Updated MEMORY.md: recorded English-only preference
+- Outcome: repository structure fully matches reference; all content in English

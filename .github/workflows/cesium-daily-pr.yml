@@ -1,0 +1,82 @@
+name: Cesium Daily PR Digest
+
+on:
+  schedule:
+    # Every day at 13:00 Beijing time (UTC 05:00)
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  cesium-pr-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch new Cesium PRs and create summary issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+
+            // Fetch PRs opened in CesiumGS/cesium in the last 24 hours
+            const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+
+            let newPRs = [];
+            try {
+              const result = await github.rest.pulls.list({
+                owner: 'CesiumGS',
+                repo: 'cesium',
+                state: 'open',
+                sort: 'created',
+                direction: 'desc',
+                per_page: 100
+              });
+
+              newPRs = result.data.filter(pr => pr.created_at >= since);
+            } catch (e) {
+              console.log('Failed to fetch Cesium PRs:', e.message);
+            }
+
+            // Build issue body
+            let body = `> 🤖 This digest is generated automatically by GitHub Actions.\n`;
+            body += `> 📅 Date: ${todayStr} | Source: [CesiumGS/cesium](https://github.com/CesiumGS/cesium)\n\n`;
+
+            if (newPRs.length === 0) {
+              body += `_No new pull requests were opened in [CesiumGS/cesium](https://github.com/CesiumGS/cesium) in the last 24 hours._\n`;
+            } else {
+              body += `## 🆕 New Pull Requests (${newPRs.length})\n\n`;
+              body += `| # | Title | Author | Labels | Created |\n`;
+              body += `|---|-------|--------|--------|---------|\n`;
+
+              newPRs.forEach(pr => {
+                const labels = pr.labels.map(l => `\`${l.name}\``).join(' ') || '—';
+                const created = pr.created_at.split('T')[0];
+                body += `| [#${pr.number}](${pr.html_url}) | ${pr.title} | [@${pr.user.login}](${pr.user.html_url}) | ${labels} | ${created} |\n`;
+              });
+
+              body += `\n### Summaries\n\n`;
+              newPRs.forEach(pr => {
+                const desc = pr.body
+                  ? pr.body.replace(/\r\n/g, '\n').split('\n').slice(0, 5).join('\n').substring(0, 300)
+                  : '_No description provided._';
+                body += `#### [#${pr.number}](${pr.html_url}) — ${pr.title}\n\n`;
+                body += `**Author:** [@${pr.user.login}](${pr.user.html_url})\n\n`;
+                body += `${desc}\n\n`;
+              });
+            }
+
+            body += `\n---\n`;
+            body += `_💡 To adjust the schedule or target repository, edit \`.github/workflows/cesium-daily-pr.yml\`_\n`;
+
+            // Create the issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🛰️ Cesium Daily PR Digest — ${todayStr}`,
+              body: body,
+              labels: ['cesium-digest']
+            });
+
+            console.log(`Cesium PR digest issue created for ${todayStr} (${newPRs.length} new PRs)`);

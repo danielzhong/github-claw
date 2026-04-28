@@ -17,7 +17,7 @@ _This file is Claw's persistent memory. It is updated after tasks when durable f
 
 ## Preferences & Patterns
 
-_(Add entries here as they are learned)_
+- **Language**: English only — all files, comments, commit messages, and AI responses must be in English
 
 ## Key Decisions
 
