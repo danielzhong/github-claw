@@ -64,7 +64,7 @@ A Skill Pack (Agent Skill) is the core mechanism of this repository — it encap
 
 | Workflow | Trigger | AI Capability |
 |----------|---------|---------------|
-| `cesium-daily-pr.yml` | Daily at 13:00 Beijing time | Automatically fetches new PRs opened in [CesiumGS/cesium](https://github.com/CesiumGS/cesium) that day and publishes a summary Issue |
+| `cesium-daily-pr.yml` | Daily at 13:00 | Automatically fetches new PRs opened in [CesiumGS/cesium](https://github.com/CesiumGS/cesium) that day and publishes a summary Issue |
 | `issue-handler.yml` | New Issue created | Auto-replies, detects bug Issues, and assigns them to the Copilot coding agent for automatic fixing |
 | `deploy-pages.yml` | Push to `main` touching `site/**` | Automatically deploys the AI-generated static site to GitHub Pages |
 
