@@ -26,7 +26,7 @@ _This file is Claw's persistent memory. It is updated after tasks when durable f
 
 ## Skills
 
-- **cesium-pr-review** (`.agents/skills/cesium-pr-review/SKILL.md`): Reviews CesiumGS/cesium PRs against official Coding Guide & Code Review Guide, finds the deployment preview URL from the PR's GitHub Actions deployment status, and returns ready-to-paste Sandcastle code with the deployment preview URL. Helper script: `prepare-preview.sh`.
+- **cesium-pr-review** (`.agents/skills/cesium-pr-review/SKILL.md`): Reviews CesiumGS/cesium PRs against official Coding Guide & Code Review Guide, finds the deployment preview URL from the PR's GitHub Actions deployment status, and returns ready-to-paste Sandcastle code with the deployment preview URL.
 
 ## Open Threads
 

@@ -117,17 +117,6 @@ The final response MUST include these sections (use these exact headings):
 
 ---
 
-## Helper Script
-
-A convenience script `prepare-preview.sh` is provided in this skill folder. The agent MAY use it, but completing the steps above is mandatory regardless of whether the script is used.
-
-Usage:
-```bash
-bash .agents/skills/cesium-pr-review/prepare-preview.sh <PR_NUMBER> [PORT]
-```
-
----
-
 ## Important Notes
 
 - **Never skip the deployment link step.** Always attempt to find the deployment URL from the PR's GitHub Actions checks. If the deployment is not found or not yet ready, report this clearly.
