@@ -59,48 +59,31 @@ Post the review comments on the PR (if the agent has write access), **or** outpu
 2. If found, extract it verbatim.
 3. If **not** found, generate a minimal but functional Sandcastle example that exercises the feature or fix introduced by the PR. The code must be copy-paste ready for <https://sandcastle.cesium.com/>.
 
-### Step 6 — Download Test Assets & Start Preview Server
+### Step 6 — Find the Deployment Preview Link from the PR
 
-This step is **MANDATORY**. The agent MUST attempt to start a server.
+This step is **MANDATORY**. The agent MUST attempt to find the deployment link.
 
-1. Create a temporary working directory:
-   ```bash
-   PREVIEW_DIR=$(mktemp -d)
-   cd "$PREVIEW_DIR"
-   ```
+The CesiumGS/cesium repository has a GitHub Actions workflow that deploys a preview for each PR. The deployment shows up as a check/status on the PR, typically named something like:
 
-2. Download any test assets referenced in the PR (model files, tilesets, etc.):
-   ```bash
-   # Example — adapt URLs to the actual PR
-   curl -L -O "https://example.com/asset.glb"
-   ```
+- `deploy / artifact: deployment`
+- `deploy / artifact: deployment — Deployed`
 
-3. Start the preview server on port **8081**:
-   ```bash
-   npx http-server ./ --cors=X-Correlation-Id -p 8081 &
-   SERVER_PID=$!
-   sleep 3
-   # Verify it started
-   curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/ || echo "SERVER FAILED TO START"
-   ```
+To find the deployment URL:
 
-4. If the server fails to start, report the exact error in the **Blocked / Not Completed** section. Do NOT silently skip.
+1. Use the GitHub MCP `pull_request_read` tool with method `get_check_runs` to list the check runs / statuses on the PR's head commit.
+2. Look for a check run or deployment status whose name contains **"deploy"** or **"deployment"**.
+3. Extract the **deployment URL** from the check run's `details_url`, or from the deployment environment URL. This is the live preview link that users normally click in the PR UI.
+4. If no deployment is found or the deployment has not completed yet, report this in the **Blocked / Not Completed** section. Do NOT silently skip.
 
-### Step 7 — Return Hosted URLs & Sandcastle Code
+### Step 7 — Return Deployment URL & Sandcastle Code
 
 Construct and return:
 
-1. **Codespaces preview base URL** (the user's Codespaces forwarded port):
-   ```
-   https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/
-   ```
+1. **Deployment preview URL** — the link extracted from the PR's deployment status in Step 6.
 
-2. **Full hosted asset URLs**, e.g.:
-   ```
-   https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/asset.glb
-   ```
+2. **Ready-to-paste Sandcastle code** that references the deployment preview URL (and any hosted asset paths) so the user can paste it directly into Sandcastle and see the demo without modification.
 
-3. **Ready-to-paste Sandcastle code** that references the hosted URLs above so the user can paste it directly into Sandcastle and see the demo without modification.
+3. If test assets are referenced in the PR, construct the full asset URLs relative to the deployment preview URL.
 
 ---
 
@@ -121,11 +104,11 @@ The final response MUST include these sections (use these exact headings):
 ## Sandcastle Code
 <Copy-paste-ready code block>
 
-## Hosted Preview
-- Server status: running / failed
-- Base URL: https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/
-- Asset URLs:
-  - <list each hosted file>
+## Deployment Preview
+- Deployment status: deployed / pending / not found
+- Preview URL: <deployment URL from PR checks>
+- Asset URLs (if applicable):
+  - <list each hosted file relative to the deployment URL>
 
 ## Blocked / Not Completed
 <If ALL steps succeeded, write "All steps completed successfully.">
@@ -134,20 +117,8 @@ The final response MUST include these sections (use these exact headings):
 
 ---
 
-## Helper Script
-
-A convenience script `prepare-preview.sh` is provided in this skill folder. The agent MAY use it, but completing the steps above is mandatory regardless of whether the script is used.
-
-Usage:
-```bash
-bash .agents/skills/cesium-pr-review/prepare-preview.sh <PR_NUMBER> [PORT]
-```
-
----
-
 ## Important Notes
 
-- **Never skip the server step.** Even if there are no downloadable assets, start the server with at least an empty directory or a generated HTML file so the user always gets a working preview URL.
-- **Always use the exact Codespaces host URL** provided above unless the user specifies a different one. The default `miniature-doodle-vg6gx5wvrrphwg57` is the owner's current Codespace name; update it in this file if the Codespace is recreated.
+- **Never skip the deployment link step.** Always attempt to find the deployment URL from the PR's GitHub Actions checks. If the deployment is not found or not yet ready, report this clearly.
 - **Always fetch the latest guidelines** — do not rely on cached or memorised versions.
-- **The Sandcastle code must reference hosted URLs**, not local paths, so it works when pasted into sandcastle.cesium.com.
+- **The Sandcastle code must reference the deployment preview URL**, not local paths, so it works when pasted into sandcastle.cesium.com.

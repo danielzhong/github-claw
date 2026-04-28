@@ -4,6 +4,15 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 
 ---
 
+## 2026-04-28 — Update cesium-pr-review deploy link to use PR deployment status
+
+- Changed Step 6 from "Download Test Assets & Start Preview Server" (local http-server on port 8081) to "Find the Deployment Preview Link from the PR" (extract deployment URL from PR's GitHub Actions checks)
+- Changed Step 7 from hardcoded Codespaces URL to dynamic deployment preview URL
+- Updated output format section to show "Deployment Preview" instead of "Hosted Preview"
+- Updated Important Notes to remove Codespaces-specific references
+- Updated MEMORY.md skills section to reflect new approach
+- Outcome: Skill now instructs agent to find deployment link from PR checks (e.g. "deploy / artifact: deployment") instead of spinning up a local server
+
 ## 2026-04-28 — Rebuild cesium-pr-review skill (v2, mandatory enforcement)
 
 - Moved skill from `.agents/skills/` to `.github/skills/cesium-pr-review/SKILL.md` (GitHub recommended location)
