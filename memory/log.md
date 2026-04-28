@@ -12,6 +12,17 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 - Key improvements over v1: server start is mandatory (not optional), exact output format enforced, Sandcastle code must use hosted URLs, guidelines must be fetched fresh every time
 - Outcome: skill ready; invoke with `Use the cesium-pr-review skill to review <PR URL>`
 
+## 2026-04-28 — Review CesiumGS/cesium PR #13404 (MVT Data Provider)
+
+- Invoked cesium-pr-review skill for https://github.com/CesiumGS/cesium/pull/13404
+- Fetched both Cesium Coding Guide and Code Review Guide via web_fetch
+- Fetched full PR diff (~90KB across 10 files) via web_fetch (GitHub MCP tools blocked by SAML SSO)
+- Identified 12 review items: missing CHANGES.md entry, exposed test helpers, `@type {*}` casts should use `@ts-expect-error`, null dereference risk in decodeMVT geometry parsing, removed nullFeatureId check needs documentation
+- Downloaded highway_roads_uncompressed.zip test assets, started http-server on port 8081
+- Prepared Sandcastle code with hosted Codespaces URLs
+- Could not post review comments directly due to SAML SSO; provided ready-to-paste format
+- Outcome: full review delivered with all 7 skill steps completed (Step 4 partial — comments not posted)
+
 ## 2026-04-28 — Build full repo structure in English
 
 - Rewrote README.md in English: mirrors liyupi/github-claw structure, excludes "AI-produced sub-projects" section, references Cesium PR digest instead of AI tech digest
