@@ -148,6 +148,6 @@ bash .github/skills/cesium-pr-review/prepare-preview.sh <PR_NUMBER> [PORT]
 ## Important Notes
 
 - **Never skip the server step.** Even if there are no downloadable assets, start the server with at least an empty directory or a generated HTML file so the user always gets a working preview URL.
-- **Always use the exact Codespaces host URL** provided above (or as overridden by the user).
+- **Always use the exact Codespaces host URL** provided above unless the user specifies a different one. The default `miniature-doodle-vg6gx5wvrrphwg57` is the owner's current Codespace name; update it in this file if the Codespace is recreated.
 - **Always fetch the latest guidelines** — do not rely on cached or memorised versions.
 - **The Sandcastle code must reference hosted URLs**, not local paths, so it works when pasted into sandcastle.cesium.com.
