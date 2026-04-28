@@ -21,3 +21,15 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 - Created .github/workflows/: cesium-daily-pr.yml, issue-handler.yml, deploy-pages.yml
 - Updated MEMORY.md: recorded English-only preference
 - Outcome: repository structure fully matches reference; all content in English
+
+## 2026-04-28 — Cesium PR #13404 Review (MVT loading pipeline)
+
+- Invoked cesium-pr-review skill against CesiumGS/cesium#13404
+- Fetched CodingGuide and CodeReviewGuide via web_fetch (GitHub MCP blocked by SAML SSO)
+- Fetched full PR diff (~90KB across 10 files) and description
+- Identified 12 guideline violations (function cohesion, private API leaks, missing null guards, type checking, CHANGES.md not updated, etc.)
+- Prepared 7 ready-to-paste review comments
+- Downloaded 3 test asset zips (highway_roads, highway_roads_no_clipping, highway_roads_uncompressed), extracted
+- Started http-server on port 8081, verified with curl
+- Provided Sandcastle code adapted with Codespaces hosted URLs
+- Outcome: review complete; comments ready to paste; server running; could not post comments directly (SAML SSO)
