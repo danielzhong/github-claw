@@ -24,6 +24,10 @@ _This file is Claw's persistent memory. It is updated after tasks when durable f
 - Workspace design follows a lightweight, file-based memory model (no external databases required)
 - `AGENTS.md` is the single source of truth for agent behaviour and workflow rules
 
+## Skills
+
+- **cesium-pr-review** (`.github/skills/cesium-pr-review/SKILL.md`): Reviews CesiumGS/cesium PRs against official Coding Guide & Code Review Guide, hosts test assets via http-server on port 8081, and returns ready-to-paste Sandcastle code with Codespaces preview URLs. Helper script: `prepare-preview.sh`.
+
 ## Open Threads
 
 _(Ongoing topics or questions that span multiple sessions)_
