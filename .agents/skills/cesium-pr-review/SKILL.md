@@ -1,162 +1,153 @@
-# Skill: cesium-pr-review
+# Cesium PR Review Skill
 
-## Overview
+## Purpose
 
-A specialized Cesium pull request review skill. When invoked, it performs a thorough review of a CesiumGS/cesium PR against the official Coding Guide and Code Review Guide, posts structured feedback directly on the PR, and provides a live Sandcastle preview hosted from a Codespace so reviewers can interact with the changes instantly.
+Review pull requests in the [CesiumGS/cesium](https://github.com/CesiumGS/cesium) repository against official Cesium coding and review guidelines, then provide a live-preview environment so the user can immediately see and test the changes.
 
-## Capabilities
+## When to Invoke
 
-- Review every changed file against the [Cesium Coding Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodingGuide/README.md) and [Code Review Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodeReviewGuide/README.md)
-- Post a structured review comment on the PR with a checklist of findings; if a rule is violated and no comment already covers it, add the comment
-- Extract or generate a Sandcastle demo from the PR description, code changes, or test files
-- Download any test data files attached to the PR (e.g. glTF, 3D Tiles, images) and host them via `http-server ./ --cors=X-Correlation-Id` from the active Codespace
-- Produce a ready-to-paste Sandcastle snippet that points at the hosted asset URL so reviewers can see a fully working demo with one copy-paste
-
-## How to Invoke
+Invoke this skill when the user asks to review a Cesium PR, e.g.:
 
 ```
-Use the cesium-pr-review skill to review PR #<number> in CesiumGS/cesium.
+Use the cesium-pr-review skill to review https://github.com/CesiumGS/cesium/pull/NNNNN.
 ```
-
-Optional parameters:
-- `codespace_host` — base URL of your running Codespace (e.g. `https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev`). If omitted the skill will remind you to provide one.
-- `port` — port used by http-server inside the Codespace (default: `8081`)
-
-## Review Workflow
-
-### Step 1 — Fetch the PR
-
-1. Read the PR title, description, linked issue, and all changed files using the GitHub MCP tools.
-2. Check for an existing Contributor License Agreement (CLA) for the author. If missing, note it in the review.
-3. Identify which areas of CesiumJS are touched: rendering, scene, math, widgets, GLSL, documentation, tests, etc.
-
-### Step 2 — Apply the Coding Guide rules
-
-Read every changed `.js`, `.glsl`, and `.html` file and check for the following. For each violation, record the file path, line number (if determinable), violated rule, and a concrete suggestion.
-
-| Category | Key rules to enforce |
-|----------|----------------------|
-| **Naming** | Directory names `PascalCase`; constructors `PascalCase`; functions/variables `camelCase`; private members prefixed with `_`; constants `UPPER_SNAKE_CASE`; no excessive abbreviations; files named after the identifier they export |
-| **Formatting** | Code should be `prettier`-formatted; HTML uses double quotes; files end with a newline |
-| **Linting** | No `alert`; no floating decimals (`.5` → `0.5`); no implicit globals; no `else` after `return`; single quotes in JS strings; no use-before-define |
-| **Functions** | Options objects used for ≥ 3 parameters; defaults use `defaultValue()`; errors thrown via `DeveloperError` / `RuntimeError`; scratch `result` parameters used for allocations in hot paths |
-| **Classes** | Constructor at top of file; `from` constructors are static; `to` functions return new instances; static constants use `Object.freeze()`; prototype functions on fundamental classes used sparingly |
-| **Design** | Deprecation warnings added for any removed or renamed public API; `CHANGES.md` updated |
-| **GLSL** | Naming matches JS conventions adapted for GLSL; no `#include` loops; prefer built-in functions; avoid texture fetches inside loops |
-| **Tests** | New behaviour must have spec coverage; specs follow the pattern in `Specs/`; no hard-coded pixel counts without justification |
-| **Documentation** | New public API has JSDoc (`@param`, `@returns`, `@exception`, `@example`); `@example` uses Sandcastle-compatible code |
-
-### Step 3 — Apply the Code Review Guide rules
-
-| Check | Action |
-|-------|--------|
-| PR has a clear description and links to an issue | Note if missing |
-| New public API → `CHANGES.md` updated | Verify and flag if not |
-| New public API → reference docs added | Verify and flag if not |
-| Deprecated/breaking changes handled correctly | Verify against the deprecation pattern |
-| All CI checks pass (GitHub Actions: build, ESLint, docs) | Report current status |
-| Sandcastle example included or updated for user-visible changes | Generate one if absent (see Step 4) |
-| Scope creep | Flag any changes unrelated to the stated goal |
-| Tests run locally | Note that the reviewer should run `npm run test` |
-
-### Step 4 — Sandcastle preview
-
-1. **Find existing Sandcastle code**: search the PR description and comments for a Sandcastle snippet (look for `const viewer = new Cesium.Viewer` or `Sandcastle.addDefaultToolbarButton`).
-2. **Extract test data URLs**: look for download links to `.glb`, `.gltf`, `.b3dm`, `.i3dm`, `.cmpt`, `.terrain`, `.jpg`, `.png`, `.kml`, `.czml` files in the PR description or linked issues.
-3. **If test data files exist**:
-   a. Download each file into a temporary directory (e.g. `/tmp/cesium-pr-<number>/`).
-   b. Start `http-server` in that directory:
-      ```bash
-      npx http-server /tmp/cesium-pr-<number>/ --cors=X-Correlation-Id --port <port>
-      ```
-   c. Replace any relative or placeholder URLs in the Sandcastle snippet with the fully qualified Codespace URL:
-      `https://<codespace_host>/<filename>`
-4. **If no Sandcastle code exists**: generate a minimal working example based on the PR's changed API or feature using the pattern below.
-5. **Produce the final Sandcastle snippet**: wrap the code so it is self-contained and directly paste-able into [Cesium Sandcastle](https://sandcastle.cesium.com/).
-
-#### Sandcastle template
-
-```javascript
-// Auto-generated preview for PR #<number>: <PR title>
-// Hosted assets: <codespace_host>
-const viewer = new Cesium.Viewer("cesiumContainer");
-
-// --- BEGIN PREVIEW CODE ---
-// <insert feature-specific code here>
-// --- END PREVIEW CODE ---
-```
-
-### Step 5 — Post the review comment
-
-Compose a single GitHub PR comment with the following structure and post it using the GitHub MCP `create_review` or `add_comment` tool:
-
-```markdown
-## 🔍 Cesium PR Review — Automated
-
-### Coding Guide Checklist
-<!-- One line per finding; ✅ = passes, ⚠️ = suggestion, ❌ = violation -->
-- [ ] ❌ **Naming** — `myFunction_` should be `_myFunction` (private member prefix) — `Source/Scene/Foo.js:42`
-- [ ] ✅ Formatting — prettier-compatible
-- [ ] ⚠️ **CHANGES.md** — new public method `Bar.fromValue()` is not listed
-...
-
-### Code Review Guide Checklist
-- [ ] ✅ PR description is clear
-- [ ] ❌ **Reference docs** — `Bar.fromValue()` has no JSDoc `@param` or `@returns`
-- [ ] ✅ CI checks pass
-...
-
-### 🚀 Sandcastle Preview
-
-Paste the snippet below into [Cesium Sandcastle](https://sandcastle.cesium.com/) to preview this PR:
-
-\`\`\`javascript
-<generated or extracted snippet>
-\`\`\`
-
-**Hosted assets** (served from Codespace):
-- `<codespace_host>/<file1>` — <description>
-
-> Preview hosted via `http-server` on `<codespace_host>`.
-> Re-run the skill after each push to get an updated snippet.
 
 ---
-*Generated by the `cesium-pr-review` skill. Rules sourced from the [Coding Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodingGuide/README.md) and [Code Review Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodeReviewGuide/README.md).*
+
+## Mandatory Steps (ALL are required)
+
+Every invocation MUST execute **all seven steps below in order**. If any step cannot be completed, the agent MUST add a **"Blocked / Not Completed"** section at the end explaining exactly why, what was attempted, and what the user can do to unblock it.
+
+### Step 1 — Fetch the Cesium Guidelines
+
+Read **both** documents in full before reviewing any code:
+
+1. **Coding Guide**: <https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodingGuide/README.md>
+2. **Code Review Guide**: <https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodeReviewGuide/README.md>
+
+Use the GitHub MCP `get_file_contents` tool or `web_fetch` to retrieve these. Do NOT skip or summarise from memory — always fetch the latest version.
+
+### Step 2 — Fetch the PR
+
+Retrieve the PR metadata, diff, description, comments, and changed files using GitHub MCP tools:
+
+- `pull_request_read` with methods: `get`, `get_diff`, `get_files`, `get_comments`, `get_review_comments`
+
+Record:
+- PR title, author, description body
+- All changed files and their diffs
+- Any Sandcastle code snippets mentioned in the description or comments
+- Any downloadable test asset URLs (`.glb`, `.gltf`, `.3dtiles`, `.b3dm`, `.json`, etc.)
+
+### Step 3 — Review Against Guidelines
+
+Compare every changed file / diff hunk against the Coding Guide and Code Review Guide. For each violation found, prepare a review comment with:
+
+- **File & line reference**
+- **Rule violated** (quote the relevant guideline section)
+- **Suggested fix**
+
+If no violations are found, state that explicitly.
+
+### Step 4 — Post or Prepare Review Comments
+
+Post the review comments on the PR (if the agent has write access), **or** output them in a ready-to-paste format so the user can post them manually.
+
+### Step 5 — Obtain Sandcastle Code
+
+1. **First**, look for Sandcastle code in the PR description, PR comments, or changed test files.
+2. If found, extract it verbatim.
+3. If **not** found, generate a minimal but functional Sandcastle example that exercises the feature or fix introduced by the PR. The code must be copy-paste ready for <https://sandcastle.cesium.com/>.
+
+### Step 6 — Download Test Assets & Start Preview Server
+
+This step is **MANDATORY**. The agent MUST attempt to start a server.
+
+1. Create a temporary working directory:
+   ```bash
+   PREVIEW_DIR=$(mktemp -d)
+   cd "$PREVIEW_DIR"
+   ```
+
+2. Download any test assets referenced in the PR (model files, tilesets, etc.):
+   ```bash
+   # Example — adapt URLs to the actual PR
+   curl -L -O "https://example.com/asset.glb"
+   ```
+
+3. Start the preview server on port **8081**:
+   ```bash
+   npx http-server ./ --cors=X-Correlation-Id -p 8081 &
+   SERVER_PID=$!
+   sleep 3
+   # Verify it started
+   curl -s -o /dev/null -w "%{http_code}" http://localhost:8081/ || echo "SERVER FAILED TO START"
+   ```
+
+4. If the server fails to start, report the exact error in the **Blocked / Not Completed** section. Do NOT silently skip.
+
+### Step 7 — Return Hosted URLs & Sandcastle Code
+
+Construct and return:
+
+1. **Codespaces preview base URL** (the user's Codespaces forwarded port):
+   ```
+   https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/
+   ```
+
+2. **Full hosted asset URLs**, e.g.:
+   ```
+   https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/asset.glb
+   ```
+
+3. **Ready-to-paste Sandcastle code** that references the hosted URLs above so the user can paste it directly into Sandcastle and see the demo without modification.
+
+---
+
+## Output Format
+
+The final response MUST include these sections (use these exact headings):
+
+```markdown
+## PR Summary
+<PR number, title, author, one-line description>
+
+## Guideline Violations
+<Table or list of violations, or "None found">
+
+## Review Comments
+<Ready-to-post comments, or confirmation they were posted>
+
+## Sandcastle Code
+<Copy-paste-ready code block>
+
+## Hosted Preview
+- Server status: running / failed
+- Base URL: https://miniature-doodle-vg6gx5wvrrphwg57-8081.app.github.dev/
+- Asset URLs:
+  - <list each hosted file>
+
+## Blocked / Not Completed
+<If ALL steps succeeded, write "All steps completed successfully.">
+<Otherwise, explain each incomplete step, what was tried, and how to unblock.>
 ```
 
-If a previous review comment from this skill already exists on the PR, **edit it** (update in place) rather than adding a duplicate.
+---
 
-## Hosting Setup (Codespace)
+## Helper Script
 
-The skill assumes you have a Codespace (or any GitHub-forwarded port) with `http-server` available. To prepare your environment once:
+A convenience script `prepare-preview.sh` is provided in this skill folder. The agent MAY use it, but completing the steps above is mandatory regardless of whether the script is used.
 
+Usage:
 ```bash
-# Inside your Cesium Codespace terminal
-npm install -g http-server
-
-# Serve the temp directory for a specific PR
-npx http-server /tmp/cesium-pr-<number>/ --cors=X-Correlation-Id --port 8081
+bash .agents/skills/cesium-pr-review/prepare-preview.sh <PR_NUMBER> [PORT]
 ```
 
-The forwarded URL will be in the form:
-`https://<codespace-name>-8081.app.github.dev/`
+---
 
-Provide this URL to the skill via the `codespace_host` parameter so it can construct the correct asset links inside the Sandcastle snippet.
+## Important Notes
 
-## Output Summary
-
-| Output | Description |
-|--------|-------------|
-| PR review comment | Posted/updated on the GitHub PR with a checklist of Coding Guide + Code Review Guide findings |
-| Sandcastle snippet | Ready-to-paste JavaScript that renders the feature/fix with hosted assets |
-| Asset server command | `http-server` command to run in your Codespace for any downloadable test files |
-| Preview link | Direct Sandcastle link with the snippet pre-filled (if the Sandcastle URL API is available) |
-
-## Notes
-
-- Rules are sourced **exclusively** from the official guides:
-  - [Coding Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodingGuide/README.md)
-  - [Code Review Guide](https://github.com/CesiumGS/cesium/blob/main/Documentation/Contributors/CodeReviewGuide/README.md)
-- The skill does **not** override CI; it complements it. Always ensure GitHub Actions checks pass before merging.
-- For very large PRs (>50 changed files) the skill will focus on the most impactful files (new public API, new shaders, changed spec files) and note that a full file-by-file review was not performed.
-- Sandcastle snippets are generated in good faith. They may need manual tweaking for complex features.
+- **Never skip the server step.** Even if there are no downloadable assets, start the server with at least an empty directory or a generated HTML file so the user always gets a working preview URL.
+- **Always use the exact Codespaces host URL** provided above unless the user specifies a different one. The default `miniature-doodle-vg6gx5wvrrphwg57` is the owner's current Codespace name; update it in this file if the Codespace is recreated.
+- **Always fetch the latest guidelines** — do not rely on cached or memorised versions.
+- **The Sandcastle code must reference hosted URLs**, not local paths, so it works when pasted into sandcastle.cesium.com.
