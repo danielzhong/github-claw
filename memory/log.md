@@ -4,11 +4,13 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 
 ---
 
-## 2026-04-28 — Create cesium-pr-review skill
+## 2026-04-28 — Rebuild cesium-pr-review skill (v2, mandatory enforcement)
 
-- Created `.agents/skills/cesium-pr-review/SKILL.md`
-- Skill covers: Coding Guide + Code Review Guide enforcement, PR comment posting, Sandcastle preview generation, test-file hosting via `http-server --cors=X-Correlation-Id` in a Codespace
-- Outcome: skill ready to use; invoke with "Use the cesium-pr-review skill to review PR #<number>"
+- Moved skill from `.agents/skills/` to `.github/skills/cesium-pr-review/SKILL.md` (GitHub recommended location)
+- Rewrote SKILL.md with 7 mandatory steps — agent MUST execute all or explain failures in a "Blocked / Not Completed" section
+- Added `prepare-preview.sh` helper script for asset download + http-server startup
+- Key improvements over v1: server start is mandatory (not optional), exact output format enforced, Sandcastle code must use hosted URLs, guidelines must be fetched fresh every time
+- Outcome: skill ready; invoke with `Use the cesium-pr-review skill to review <PR URL>`
 
 ## 2026-04-28 — Build full repo structure in English
 
