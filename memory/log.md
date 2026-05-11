@@ -4,6 +4,12 @@ _Rolling log of completed tasks. Oldest entries are pruned once they are no long
 
 ---
 
+## 2026-05-11 — Pause Cesium Daily PR Digest bot
+
+- Commented out the cron schedule in `.github/workflows/cesium-daily-pr.yml`
+- The workflow can still be triggered manually via `workflow_dispatch`
+- Outcome: No more automatic daily issues; re-enable by uncommenting the schedule block
+
 ## 2026-04-28 — Update cesium-pr-review deploy link to use PR deployment status
 
 - Changed Step 6 from "Download Test Assets & Start Preview Server" (local http-server on port 8081) to "Find the Deployment Preview Link from the PR" (extract deployment URL from PR's GitHub Actions checks)
